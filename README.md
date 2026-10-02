@@ -16,6 +16,7 @@ Implémenté
 - tenant — Tenant (locataire). ATTENTION au vocabulaire : désigne le locataire (cahier des charges), pas le tenant SaaS (organisation) utilisé partout ailleurs (TenantClaims) — voir le commentaire en tête de Tenant.java.
 - lease — Lease (bail) rattaché à une Unit, avec cotitulaires via LeaseTenant (N:N avec Tenant, même principe que PropertyOwner). Validation que chaque locataire appartient à la même organisation que l'unité.
 - finance — Payment (échéancier de loyer rattaché à un bail, paiement complet/partiel via recordPayment) et Transaction (revenus/dépenses au niveau propriété, par catégorie).
+- maintenance — MaintenanceRequest (propriété, unité optionnelle ou espace commun), cycle de vie OUVERTE → EN_COURS/TERMINEE avec prestataire et coût à la clôture.
 
 À venir (ordre indicatif, voir §8 et §21 du cahier des charges)
 - lease — baux, versions, renouvellement, résiliation, juridiction
@@ -46,6 +47,9 @@ POST /api/v1/properties/{propertyId}/units/{unitId}/leases/{leaseId}/payments/{p
 GET .../payments/{paymentId} et GET .../payments — lire / lister les échéances d'un bail
 POST /api/v1/properties/{propertyId}/transactions — enregistrer un revenu ou une dépense
 GET /api/v1/properties/{propertyId}/transactions/{id} et GET .../transactions — lire / lister les transactions d'une propriété
+POST /api/v1/properties/{propertyId}/maintenance-requests — créer une demande de maintenance
+POST .../maintenance-requests/{id}/close — clôturer avec prestataire et coût
+GET .../maintenance-requests/{id} et GET .../maintenance-requests — lire / lister les demandes d'une propriété
 
 Un point de sécurité important
 Contrairement à Organization dans immotran-ms-identity (où l'id de la ressource EST le tenant_id), ici l'id d'une propriété et son organizationId sont deux champs distincts : il faut donc toujours charger la ressource (404 si absente) avant de pouvoir vérifier l'accès au tenant (403 sinon). C'est un compromis assumé — voir les commentaires dans PropertyController.
