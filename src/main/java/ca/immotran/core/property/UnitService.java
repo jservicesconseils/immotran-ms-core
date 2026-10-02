@@ -40,6 +40,12 @@ public class UnitService {
         return UnitResponse.from(getEntityByIdAndProperty(unitId, propertyId));
     }
 
+    // Public (comme PropertyService.getEntityById) : le module lease a
+    // besoin de l'entite Unit brute pour sa propre relation JPA.
+    public Unit getEntityById(UUID propertyId, UUID unitId) {
+        return getEntityByIdAndProperty(unitId, propertyId);
+    }
+
     public List<UnitResponse> listByProperty(UUID propertyId) {
         // Valide au passage que la propriete existe (404 sinon), avant de
         // renvoyer une liste vide pour un id totalement inconnu.

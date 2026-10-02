@@ -13,9 +13,10 @@ Modules
 Implémenté
 - property — Property (type, adresse, province/juridiction, statut) et Unit (étiquette, étage, superficie, chambres/salles de bain, statut, indicateur "principale").
 - owner — Owner (particulier ou société) et son association N:N avec Property via PropertyOwner (part de propriété en %, contrainte d'unicité par couple propriété/propriétaire, validation que les deux appartiennent à la même organisation).
+- tenant — Tenant (locataire). ATTENTION au vocabulaire : désigne le locataire (cahier des charges), pas le tenant SaaS (organisation) utilisé partout ailleurs (TenantClaims) — voir le commentaire en tête de Tenant.java.
+- lease — Lease (bail) rattaché à une Unit, avec cotitulaires via LeaseTenant (N:N avec Tenant, même principe que PropertyOwner). Validation que chaque locataire appartient à la même organisation que l'unité.
 
 À venir (ordre indicatif, voir §8 et §21 du cahier des charges)
-- tenant — locataires, cotitulaires, historique
 - lease — baux, versions, renouvellement, résiliation, juridiction
 - finance — échéancier de loyers, paiements, dépenses, transactions, rentabilité
 - maintenance — tickets, prestataires, historique
@@ -34,6 +35,11 @@ POST /api/v1/owners — créer un propriétaire
 GET /api/v1/owners/{id} — lire un propriétaire
 POST /api/v1/properties/{propertyId}/owners — associer un propriétaire existant à une propriété, avec sa part
 GET /api/v1/properties/{propertyId}/owners — lister les propriétaires d'une propriété
+POST /api/v1/tenants — créer un locataire
+GET /api/v1/tenants/{id} — lire un locataire
+POST /api/v1/properties/{propertyId}/units/{unitId}/leases — créer un bail (un ou plusieurs locataires)
+GET /api/v1/properties/{propertyId}/units/{unitId}/leases/{leaseId} — lire un bail
+GET /api/v1/properties/{propertyId}/units/{unitId}/leases — lister les baux d'une unité (historique)
 
 Un point de sécurité important
 Contrairement à Organization dans immotran-ms-identity (où l'id de la ressource EST le tenant_id), ici l'id d'une propriété et son organizationId sont deux champs distincts : il faut donc toujours charger la ressource (404 si absente) avant de pouvoir vérifier l'accès au tenant (403 sinon). C'est un compromis assumé — voir les commentaires dans PropertyController.
