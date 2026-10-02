@@ -2,7 +2,6 @@ package ca.immotran.core.property;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -11,9 +10,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Traduit les erreurs metier/validation du module property (Property et
- * Unit) en reponses HTTP propres, plutot que de laisser Spring renvoyer
- * une trace d'exception brute.
+ * Traduit les erreurs metier du module property (Property et Unit) en
+ * reponses HTTP propres, plutot que de laisser Spring renvoyer une trace
+ * d'exception brute.
+ *
+ * Les erreurs de VALIDATION (@Valid / MethodArgumentNotValidException)
+ * sont gerees ailleurs, par GlobalExceptionHandler : elles sont
+ * transverses a tous les modules, pas specifiques a property, et ne
+ * doivent exister qu'a UN seul endroit (deux @RestControllerAdvice
+ * gerant la meme exception rendraient le mapping ambigu au demarrage).
  */
 @RestControllerAdvice
 public class PropertyExceptionHandler {
@@ -26,15 +31,6 @@ public class PropertyExceptionHandler {
     @ExceptionHandler(UnitNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleUnitNotFound(UnitNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody(ex.getMessage()));
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldErrors().stream()
-                .findFirst()
-                .map(error -> error.getDefaultMessage())
-                .orElse("requete invalide");
-        return ResponseEntity.badRequest().body(errorBody(message));
     }
 
     private Map<String, Object> errorBody(String message) {

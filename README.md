@@ -12,9 +12,9 @@ Modules
 
 Implémenté
 - property — Property (type, adresse, province/juridiction, statut) et Unit (étiquette, étage, superficie, chambres/salles de bain, statut, indicateur "principale").
+- owner — Owner (particulier ou société) et son association N:N avec Property via PropertyOwner (part de propriété en %, contrainte d'unicité par couple propriété/propriétaire, validation que les deux appartiennent à la même organisation).
 
 À venir (ordre indicatif, voir §8 et §21 du cahier des charges)
-- owner — propriétaires, association N:N avec les propriétés, parts de copropriété
 - tenant — locataires, cotitulaires, historique
 - lease — baux, versions, renouvellement, résiliation, juridiction
 - finance — échéancier de loyers, paiements, dépenses, transactions, rentabilité
@@ -30,6 +30,10 @@ GET /api/v1/properties/{id} — lire une propriété (tenant vérifié sur l'org
 POST /api/v1/properties/{propertyId}/units — ajouter une unité à une propriété
 GET /api/v1/properties/{propertyId}/units/{unitId} — lire une unité
 GET /api/v1/properties/{propertyId}/units — lister les unités d'une propriété
+POST /api/v1/owners — créer un propriétaire
+GET /api/v1/owners/{id} — lire un propriétaire
+POST /api/v1/properties/{propertyId}/owners — associer un propriétaire existant à une propriété, avec sa part
+GET /api/v1/properties/{propertyId}/owners — lister les propriétaires d'une propriété
 
 Un point de sécurité important
 Contrairement à Organization dans immotran-ms-identity (où l'id de la ressource EST le tenant_id), ici l'id d'une propriété et son organizationId sont deux champs distincts : il faut donc toujours charger la ressource (404 si absente) avant de pouvoir vérifier l'accès au tenant (403 sinon). C'est un compromis assumé — voir les commentaires dans PropertyController.
