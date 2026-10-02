@@ -19,9 +19,14 @@ Implémenté
 - maintenance — MaintenanceRequest (propriété, unité optionnelle ou espace commun), cycle de vie OUVERTE → EN_COURS/TERMINEE avec prestataire et coût à la clôture.
 - document — Document : métadonnées seulement (référence polymorphe entityType/entityId vers n'importe quel module). L'upload réel (S3, URL présignée) est hors scope de ce recit — voir Document.java.
 - dashboard — agrège property/finance/maintenance/lease pour une organisation (propriétés, unités occupées/vacantes, maintenance ouverte, revenus/dépenses, baux à échéance sous 30 jours). Bénéfice concret du monolithe modulaire : jointures JPQL directes, aucun appel réseau entre modules.
+- admin — JurisdictionRule (catalogue de règles provinciales, donnée de référence PARTAGÉE par toute la plateforme, pas de tenant_id) et AuditLog (entité + service `record()` prêts, mais pas encore câblés automatiquement dans les autres modules — voir le Javadoc d'AuditLog.java). Pas de RBAC : les roles ne sont pas encore modélisés dans le jeton, donc n'importe quel utilisateur authentifié peut créer une règle juridictionnelle pour l'instant.
 
-À venir (ordre indicatif, voir §8 et §21 du cahier des charges)
-- admin — catalogue de règles provinciales/territoriales, audit
+Tous les modules du MVP (§21, Phase 1 du cahier des charges) sont maintenant couverts par une tranche verticale fonctionnelle et testée. Les approfondissements naturels pour la suite (hors MVP initial) :
+- RBAC réel une fois les rôles modélisés côté immotran-ms-identity
+- Câblage d'AuditLog dans les autres modules (probablement via un aspect Spring AOP plutôt qu'en modifiant chaque contrôleur)
+- Upload réel de documents vers S3 (URL présignée)
+- Catalogue de règles juridictionnelles réellement rempli par province (actuellement juste la structure de données)
+- Flyway/Liquibase si une vraie base partagée (RDS) remplace H2
 
 Ce qu'il expose aujourd'hui
 
@@ -51,6 +56,9 @@ POST /api/v1/documents — enregistrer les métadonnées d'un document
 GET /api/v1/documents/{id} — lire un document
 GET /api/v1/documents?organizationId=&entityType=&entityId= — lister les documents d'une entité
 GET /api/v1/organizations/{organizationId}/dashboard — indicateurs de portefeuille (occupation, revenus/dépenses, maintenance ouverte, baux à échéance)
+POST /api/v1/admin/jurisdiction-rules — créer une règle juridictionnelle (pas de contrôle de tenant, donnée partagée)
+GET /api/v1/admin/jurisdiction-rules/{id} et GET /api/v1/admin/jurisdiction-rules?province= — lire / lister par province
+GET /api/v1/organizations/{organizationId}/audit-logs — lister le journal d'audit d'une organisation
 
 Un point de sécurité important
 Contrairement à Organization dans immotran-ms-identity (où l'id de la ressource EST le tenant_id), ici l'id d'une propriété et son organizationId sont deux champs distincts : il faut donc toujours charger la ressource (404 si absente) avant de pouvoir vérifier l'accès au tenant (403 sinon). C'est un compromis assumé — voir les commentaires dans PropertyController.
