@@ -18,13 +18,9 @@ Implémenté
 - finance — Payment (échéancier de loyer rattaché à un bail, paiement complet/partiel via recordPayment) et Transaction (revenus/dépenses au niveau propriété, par catégorie).
 - maintenance — MaintenanceRequest (propriété, unité optionnelle ou espace commun), cycle de vie OUVERTE → EN_COURS/TERMINEE avec prestataire et coût à la clôture.
 - document — Document : métadonnées seulement (référence polymorphe entityType/entityId vers n'importe quel module). L'upload réel (S3, URL présignée) est hors scope de ce recit — voir Document.java.
+- dashboard — agrège property/finance/maintenance/lease pour une organisation (propriétés, unités occupées/vacantes, maintenance ouverte, revenus/dépenses, baux à échéance sous 30 jours). Bénéfice concret du monolithe modulaire : jointures JPQL directes, aucun appel réseau entre modules.
 
 À venir (ordre indicatif, voir §8 et §21 du cahier des charges)
-- lease — baux, versions, renouvellement, résiliation, juridiction
-- finance — échéancier de loyers, paiements, dépenses, transactions, rentabilité
-- maintenance — tickets, prestataires, historique
-- document — upload S3, permissions, versions
-- dashboard — occupation, revenus, impayés, baux à échéance
 - admin — catalogue de règles provinciales/territoriales, audit
 
 Ce qu'il expose aujourd'hui
@@ -54,6 +50,7 @@ GET .../maintenance-requests/{id} et GET .../maintenance-requests — lire / lis
 POST /api/v1/documents — enregistrer les métadonnées d'un document
 GET /api/v1/documents/{id} — lire un document
 GET /api/v1/documents?organizationId=&entityType=&entityId= — lister les documents d'une entité
+GET /api/v1/organizations/{organizationId}/dashboard — indicateurs de portefeuille (occupation, revenus/dépenses, maintenance ouverte, baux à échéance)
 
 Un point de sécurité important
 Contrairement à Organization dans immotran-ms-identity (où l'id de la ressource EST le tenant_id), ici l'id d'une propriété et son organizationId sont deux champs distincts : il faut donc toujours charger la ressource (404 si absente) avant de pouvoir vérifier l'accès au tenant (403 sinon). C'est un compromis assumé — voir les commentaires dans PropertyController.
