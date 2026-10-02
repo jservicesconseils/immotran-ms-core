@@ -1,9 +1,11 @@
 package ca.immotran.core.property.dto;
 
+import ca.immotran.core.property.BuildingStatus;
 import ca.immotran.core.property.Property;
 import ca.immotran.core.property.PropertyStatus;
 import ca.immotran.core.property.PropertyType;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -17,6 +19,14 @@ public record PropertyResponse(
         String province,
         String postalCode,
         PropertyStatus status,
+        String cadastreNumber,
+        String taxId,
+        BuildingStatus buildingStatus,
+        Integer yearBuilt,
+        Integer floorCount,
+        Double totalSurfaceArea,
+        BigDecimal estimatedValue,
+        String description,
         Instant createdAt
 ) {
 
@@ -30,6 +40,14 @@ public record PropertyResponse(
                 property.getProvince(),
                 property.getPostalCode(),
                 property.getStatus(),
+                property.getCadastreNumber(),
+                property.getTaxId(),
+                property.getBuildingStatus(),
+                property.getYearBuilt(),
+                property.getFloorCount(),
+                property.getTotalSurfaceArea(),
+                property.getEstimatedValue(),
+                property.getDescription(),
                 property.getCreatedAt());
     }
 }

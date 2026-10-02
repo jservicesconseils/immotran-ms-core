@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,12 +55,13 @@ class LeaseControllerTest {
 
     private static PropertyResponse propertyResponse(UUID id, UUID organizationId) {
         return new PropertyResponse(id, organizationId, PropertyType.MAISON_INDIVIDUELLE,
-                "123 rue des Lilas", "Montreal", "QC", "H1A 1A1", PropertyStatus.VACANTE, Instant.now());
+                "123 rue des Lilas", "Montreal", "QC", "H1A 1A1", PropertyStatus.VACANTE,
+                null, null, null, null, null, null, null, null, Instant.now());
     }
 
     private static LeaseResponse leaseResponse(UUID id, UUID propertyId, UUID unitId, List<UUID> tenantIds) {
         return new LeaseResponse(id, propertyId, unitId, tenantIds, LocalDate.of(2026, 1, 1), null,
-                new BigDecimal("1500.00"), LeaseStatus.ACTIVE, Instant.now());
+                new BigDecimal("1500.00"), new BigDecimal("500.00"), null, LeaseStatus.ACTIVE, Instant.now());
     }
 
     @Test
@@ -73,7 +75,7 @@ class LeaseControllerTest {
         when(leaseService.create(eq(propertyId), eq(unitId), any()))
                 .thenReturn(leaseResponse(leaseId, propertyId, unitId, List.of(tenantId)));
 
-        CreateLeaseRequest request = new CreateLeaseRequest(List.of(tenantId), LocalDate.of(2026, 1, 1), null, new BigDecimal("1500.00"));
+        CreateLeaseRequest request = new CreateLeaseRequest(List.of(tenantId), LocalDate.of(2026, 1, 1), null, new BigDecimal("1500.00"), new BigDecimal("500.00"));
 
         mockMvc.perform(post("/api/v1/properties/{propertyId}/units/{unitId}/leases", propertyId, unitId)
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString())))
@@ -93,7 +95,7 @@ class LeaseControllerTest {
         UUID unitId = UUID.randomUUID();
         when(propertyService.getById(propertyId)).thenReturn(propertyResponse(propertyId, organizationId));
 
-        CreateLeaseRequest request = new CreateLeaseRequest(List.of(UUID.randomUUID()), LocalDate.of(2026, 1, 1), null, new BigDecimal("1500.00"));
+        CreateLeaseRequest request = new CreateLeaseRequest(List.of(UUID.randomUUID()), LocalDate.of(2026, 1, 1), null, new BigDecimal("1500.00"), new BigDecimal("500.00"));
 
         mockMvc.perform(post("/api/v1/properties/{propertyId}/units/{unitId}/leases", propertyId, unitId)
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", autreTenant.toString())))
@@ -109,7 +111,7 @@ class LeaseControllerTest {
         UUID unitId = UUID.randomUUID();
         when(propertyService.getById(propertyId)).thenReturn(propertyResponse(propertyId, organizationId));
 
-        CreateLeaseRequest request = new CreateLeaseRequest(List.of(), LocalDate.of(2026, 1, 1), null, new BigDecimal("1500.00"));
+        CreateLeaseRequest request = new CreateLeaseRequest(List.of(), LocalDate.of(2026, 1, 1), null, new BigDecimal("1500.00"), new BigDecimal("500.00"));
 
         mockMvc.perform(post("/api/v1/properties/{propertyId}/units/{unitId}/leases", propertyId, unitId)
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString())))
@@ -125,7 +127,7 @@ class LeaseControllerTest {
         UUID unitId = UUID.randomUUID();
         when(propertyService.getById(propertyId)).thenReturn(propertyResponse(propertyId, organizationId));
 
-        CreateLeaseRequest request = new CreateLeaseRequest(List.of(UUID.randomUUID()), LocalDate.of(2026, 1, 1), null, new BigDecimal("-1"));
+        CreateLeaseRequest request = new CreateLeaseRequest(List.of(UUID.randomUUID()), LocalDate.of(2026, 1, 1), null, new BigDecimal("-1"), new BigDecimal("500.00"));
 
         mockMvc.perform(post("/api/v1/properties/{propertyId}/units/{unitId}/leases", propertyId, unitId)
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString())))
@@ -144,7 +146,7 @@ class LeaseControllerTest {
         when(leaseService.create(eq(propertyId), eq(unitId), any()))
                 .thenThrow(new LeaseTenantOrganizationMismatchException(tenantId, unitId));
 
-        CreateLeaseRequest request = new CreateLeaseRequest(List.of(tenantId), LocalDate.of(2026, 1, 1), null, new BigDecimal("1500.00"));
+        CreateLeaseRequest request = new CreateLeaseRequest(List.of(tenantId), LocalDate.of(2026, 1, 1), null, new BigDecimal("1500.00"), new BigDecimal("500.00"));
 
         mockMvc.perform(post("/api/v1/properties/{propertyId}/units/{unitId}/leases", propertyId, unitId)
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString())))
@@ -194,5 +196,37 @@ class LeaseControllerTest {
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString()))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].monthlyRent").value(1500.00));
+    }
+
+    @Test
+    void enregistrerDepotGarantie_tenantCorrespondant_renvoie200() throws Exception {
+        UUID organizationId = UUID.randomUUID();
+        UUID propertyId = UUID.randomUUID();
+        UUID unitId = UUID.randomUUID();
+        UUID leaseId = UUID.randomUUID();
+        when(propertyService.getById(propertyId)).thenReturn(propertyResponse(propertyId, organizationId));
+        when(leaseService.recordSecurityDepositPayment(unitId, leaseId))
+                .thenReturn(leaseResponse(leaseId, propertyId, unitId, List.of()));
+
+        mockMvc.perform(put("/api/v1/properties/{propertyId}/units/{unitId}/leases/{leaseId}/depot-garantie",
+                        propertyId, unitId, leaseId)
+                        .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(leaseId.toString()));
+    }
+
+    @Test
+    void enregistrerDepotGarantie_tenantDifferent_renvoie403() throws Exception {
+        UUID organizationId = UUID.randomUUID();
+        UUID autreTenant = UUID.randomUUID();
+        UUID propertyId = UUID.randomUUID();
+        UUID unitId = UUID.randomUUID();
+        UUID leaseId = UUID.randomUUID();
+        when(propertyService.getById(propertyId)).thenReturn(propertyResponse(propertyId, organizationId));
+
+        mockMvc.perform(put("/api/v1/properties/{propertyId}/units/{unitId}/leases/{leaseId}/depot-garantie",
+                        propertyId, unitId, leaseId)
+                        .with(jwt().jwt(builder -> builder.claim("tenant_id", autreTenant.toString()))))
+                .andExpect(status().isForbidden());
     }
 }

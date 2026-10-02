@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import java.net.URI;
 import java.util.List;
@@ -58,5 +59,13 @@ public class LeaseController {
         PropertyResponse property = propertyService.getById(propertyId);
         TenantClaims.from(jwt).assertAccessTo(property.organizationId());
         return ResponseEntity.ok(leaseService.listByUnit(propertyId, unitId));
+    }
+
+    @PutMapping("/{leaseId}/depot-garantie")
+    public ResponseEntity<LeaseResponse> recordSecurityDepositPayment(@PathVariable UUID propertyId, @PathVariable UUID unitId,
+                                                                       @PathVariable UUID leaseId, @AuthenticationPrincipal Jwt jwt) {
+        PropertyResponse property = propertyService.getById(propertyId);
+        TenantClaims.from(jwt).assertAccessTo(property.organizationId());
+        return ResponseEntity.ok(leaseService.recordSecurityDepositPayment(unitId, leaseId));
     }
 }

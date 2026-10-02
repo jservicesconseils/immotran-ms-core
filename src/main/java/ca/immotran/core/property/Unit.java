@@ -48,6 +48,13 @@ public class Unit {
     private Integer bathrooms;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private UnitType type;
+
+    @Column(length = 2000)
+    private String description;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private UnitStatus status;
 
@@ -59,7 +66,8 @@ public class Unit {
     }
 
     public Unit(Property property, String label, boolean principal, Integer floor,
-                Double areaSquareMeters, Integer bedrooms, Integer bathrooms) {
+                Double areaSquareMeters, Integer bedrooms, Integer bathrooms,
+                UnitType type, String description) {
         this.property = property;
         this.label = label;
         this.principal = principal;
@@ -67,8 +75,15 @@ public class Unit {
         this.areaSquareMeters = areaSquareMeters;
         this.bedrooms = bedrooms;
         this.bathrooms = bathrooms;
+        this.type = type;
+        this.description = description;
         this.status = UnitStatus.DISPONIBLE;
         this.createdAt = Instant.now();
+    }
+
+    /** Appele a la signature d'un bail (cahier des charges, §4 "prise de possession"). */
+    public void markOccupied() {
+        this.status = UnitStatus.OCCUPEE;
     }
 
     public UUID getId() {
@@ -101,6 +116,14 @@ public class Unit {
 
     public Integer getBathrooms() {
         return bathrooms;
+    }
+
+    public UnitType getType() {
+        return type;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public UnitStatus getStatus() {

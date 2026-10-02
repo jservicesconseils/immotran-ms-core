@@ -50,6 +50,15 @@ public class Lease {
     @Column(name = "monthly_rent", nullable = false, precision = 10, scale = 2)
     private BigDecimal monthlyRent;
 
+    // Depot de garantie (cahier des charges, §4 "prise de possession") --
+    // exige a la signature, mais son versement effectif (paidAt) peut
+    // survenir apres coup, d'ou le mutateur recordSecurityDepositPayment.
+    @Column(name = "security_deposit", nullable = false, precision = 10, scale = 2)
+    private BigDecimal securityDeposit;
+
+    @Column(name = "security_deposit_paid_at")
+    private Instant securityDepositPaidAt;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private LeaseStatus status;
@@ -61,13 +70,18 @@ public class Lease {
         // constructeur requis par JPA, ne pas utiliser directement
     }
 
-    public Lease(Unit unit, LocalDate startDate, LocalDate endDate, BigDecimal monthlyRent) {
+    public Lease(Unit unit, LocalDate startDate, LocalDate endDate, BigDecimal monthlyRent, BigDecimal securityDeposit) {
         this.unit = unit;
         this.startDate = startDate;
         this.endDate = endDate;
         this.monthlyRent = monthlyRent;
+        this.securityDeposit = securityDeposit;
         this.status = LeaseStatus.ACTIVE;
         this.createdAt = Instant.now();
+    }
+
+    public void recordSecurityDepositPayment(Instant paidAt) {
+        this.securityDepositPaidAt = paidAt;
     }
 
     public UUID getId() {
@@ -88,6 +102,14 @@ public class Lease {
 
     public BigDecimal getMonthlyRent() {
         return monthlyRent;
+    }
+
+    public BigDecimal getSecurityDeposit() {
+        return securityDeposit;
+    }
+
+    public Instant getSecurityDepositPaidAt() {
+        return securityDepositPaidAt;
     }
 
     public LeaseStatus getStatus() {

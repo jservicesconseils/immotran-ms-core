@@ -54,7 +54,8 @@ class PaymentControllerTest {
 
     private static PropertyResponse propertyResponse(UUID id, UUID organizationId) {
         return new PropertyResponse(id, organizationId, PropertyType.MAISON_INDIVIDUELLE,
-                "123 rue des Lilas", "Montreal", "QC", "H1A 1A1", PropertyStatus.VACANTE, Instant.now());
+                "123 rue des Lilas", "Montreal", "QC", "H1A 1A1", PropertyStatus.VACANTE,
+                null, null, null, null, null, null, null, null, Instant.now());
     }
 
     private static PaymentResponse paymentResponse(UUID id, UUID leaseId, BigDecimal amountDue, BigDecimal amountPaid, PaymentStatus status) {

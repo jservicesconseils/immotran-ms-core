@@ -28,7 +28,15 @@ public class PropertyService {
                 request.street(),
                 request.city(),
                 request.province(),
-                request.postalCode()));
+                request.postalCode(),
+                request.cadastreNumber(),
+                request.taxId(),
+                request.buildingStatus(),
+                request.yearBuilt(),
+                request.floorCount(),
+                request.totalSurfaceArea(),
+                request.estimatedValue(),
+                request.description()));
         return PropertyResponse.from(saved);
     }
 

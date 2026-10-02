@@ -8,6 +8,7 @@ import ca.immotran.core.tenant.Tenant;
 import ca.immotran.core.tenant.TenantService;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,13 +47,25 @@ public class LeaseService {
             }
         }
 
-        Lease savedLease = leaseRepository.save(new Lease(unit, request.startDate(), request.endDate(), request.monthlyRent()));
+        Lease savedLease = leaseRepository.save(
+                new Lease(unit, request.startDate(), request.endDate(), request.monthlyRent(), request.securityDeposit()));
 
         List<LeaseTenant> leaseTenants = tenants.stream()
                 .map(tenant -> leaseTenantRepository.save(new LeaseTenant(savedLease, tenant)))
                 .toList();
 
+        // La signature du bail vaut prise de possession (cahier des
+        // charges, §4) : l'unite n'est plus disponible pour un autre bail.
+        unitService.markOccupied(unit);
+
         return LeaseResponse.from(savedLease, leaseTenants);
+    }
+
+    public LeaseResponse recordSecurityDepositPayment(UUID unitId, UUID leaseId) {
+        Lease lease = getEntityByIdAndUnit(leaseId, unitId);
+        lease.recordSecurityDepositPayment(Instant.now());
+        Lease saved = leaseRepository.save(lease);
+        return LeaseResponse.from(saved, leaseTenantRepository.findByLeaseId(leaseId));
     }
 
     public LeaseResponse getById(UUID unitId, UUID leaseId) {

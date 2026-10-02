@@ -2,6 +2,7 @@ package ca.immotran.core.property.dto;
 
 import ca.immotran.core.property.Unit;
 import ca.immotran.core.property.UnitStatus;
+import ca.immotran.core.property.UnitType;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -16,6 +17,8 @@ public record UnitResponse(
         Double areaSquareMeters,
         Integer bedrooms,
         Integer bathrooms,
+        UnitType type,
+        String description,
         UnitStatus status,
         Instant createdAt
 ) {
@@ -30,6 +33,8 @@ public record UnitResponse(
                 unit.getAreaSquareMeters(),
                 unit.getBedrooms(),
                 unit.getBathrooms(),
+                unit.getType(),
+                unit.getDescription(),
                 unit.getStatus(),
                 unit.getCreatedAt());
     }

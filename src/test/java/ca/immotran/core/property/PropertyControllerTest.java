@@ -64,12 +64,14 @@ class PropertyControllerTest {
 
     private static CreatePropertyRequest createRequest(UUID organizationId) {
         return new CreatePropertyRequest(organizationId, PropertyType.MAISON_INDIVIDUELLE,
-                "123 rue des Lilas", "Montreal", "QC", "H1A 1A1");
+                "123 rue des Lilas", "Montreal", "QC", "H1A 1A1",
+                null, null, null, null, null, null, null, null);
     }
 
     private static PropertyResponse response(UUID id, UUID organizationId) {
         return new PropertyResponse(id, organizationId, PropertyType.MAISON_INDIVIDUELLE,
-                "123 rue des Lilas", "Montreal", "QC", "H1A 1A1", PropertyStatus.VACANTE, Instant.now());
+                "123 rue des Lilas", "Montreal", "QC", "H1A 1A1", PropertyStatus.VACANTE,
+                null, null, null, null, null, null, null, null, Instant.now());
     }
 
     @Test
@@ -190,9 +192,9 @@ class PropertyControllerTest {
         UUID unitId = UUID.randomUUID();
         when(propertyService.getById(propertyId)).thenReturn(response(propertyId, organizationId));
         when(unitService.create(eq(propertyId), any())).thenReturn(
-                new UnitResponse(unitId, propertyId, "Principal", true, null, null, 3, 1, UnitStatus.DISPONIBLE, Instant.now()));
+                new UnitResponse(unitId, propertyId, "Principal", true, null, null, 3, 1, null, null, UnitStatus.DISPONIBLE, Instant.now()));
 
-        CreateUnitRequest request = new CreateUnitRequest("Principal", true, null, null, 3, 1);
+        CreateUnitRequest request = new CreateUnitRequest("Principal", true, null, null, 3, 1, null, null);
 
         mockMvc.perform(post("/api/v1/properties/{propertyId}/units", propertyId)
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString())))
@@ -211,7 +213,7 @@ class PropertyControllerTest {
         UUID propertyId = UUID.randomUUID();
         when(propertyService.getById(propertyId)).thenReturn(response(propertyId, organizationId));
 
-        CreateUnitRequest request = new CreateUnitRequest("304", false, 3, 55.5, 2, 1);
+        CreateUnitRequest request = new CreateUnitRequest("304", false, 3, 55.5, 2, 1, null, null);
 
         mockMvc.perform(post("/api/v1/properties/{propertyId}/units", propertyId)
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", autreTenant.toString())))
@@ -226,7 +228,7 @@ class PropertyControllerTest {
         UUID propertyId = UUID.randomUUID();
         when(propertyService.getById(propertyId)).thenReturn(response(propertyId, organizationId));
         when(unitService.listByProperty(propertyId)).thenReturn(List.of(
-                new UnitResponse(UUID.randomUUID(), propertyId, "Principal", true, null, null, 3, 1, UnitStatus.DISPONIBLE, Instant.now())));
+                new UnitResponse(UUID.randomUUID(), propertyId, "Principal", true, null, null, 3, 1, null, null, UnitStatus.DISPONIBLE, Instant.now())));
 
         mockMvc.perform(get("/api/v1/properties/{propertyId}/units", propertyId)
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString()))))

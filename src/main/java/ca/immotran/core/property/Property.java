@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -61,6 +62,36 @@ public class Property {
     @Column(nullable = false, length = 20)
     private PropertyStatus status;
 
+    // Champs legaux/financiers optionnels -- tous nullable : la plupart des
+    // utilisateurs ne les connaitront pas des la creation d'une propriete,
+    // et on ne veut pas bloquer la creation pour une donnee qu'on pourra
+    // completer plus tard (pas d'endpoint de mise a jour pour l'instant,
+    // hors scope de ce MVP, voir README).
+    @Column(name = "cadastre_number", length = 50)
+    private String cadastreNumber;
+
+    @Column(name = "tax_id", length = 50)
+    private String taxId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "building_status", length = 20)
+    private BuildingStatus buildingStatus;
+
+    @Column(name = "year_built")
+    private Integer yearBuilt;
+
+    @Column(name = "floor_count")
+    private Integer floorCount;
+
+    @Column(name = "total_surface_area")
+    private Double totalSurfaceArea;
+
+    @Column(name = "estimated_value", precision = 12, scale = 2)
+    private BigDecimal estimatedValue;
+
+    @Column(length = 2000)
+    private String description;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -68,13 +99,23 @@ public class Property {
         // constructeur requis par JPA, ne pas utiliser directement
     }
 
-    public Property(UUID organizationId, PropertyType type, String street, String city, String province, String postalCode) {
+    public Property(UUID organizationId, PropertyType type, String street, String city, String province, String postalCode,
+                     String cadastreNumber, String taxId, BuildingStatus buildingStatus, Integer yearBuilt,
+                     Integer floorCount, Double totalSurfaceArea, BigDecimal estimatedValue, String description) {
         this.organizationId = organizationId;
         this.type = type;
         this.street = street;
         this.city = city;
         this.province = province;
         this.postalCode = postalCode;
+        this.cadastreNumber = cadastreNumber;
+        this.taxId = taxId;
+        this.buildingStatus = buildingStatus;
+        this.yearBuilt = yearBuilt;
+        this.floorCount = floorCount;
+        this.totalSurfaceArea = totalSurfaceArea;
+        this.estimatedValue = estimatedValue;
+        this.description = description;
         this.status = PropertyStatus.VACANTE;
         this.createdAt = Instant.now();
     }
@@ -109,6 +150,38 @@ public class Property {
 
     public PropertyStatus getStatus() {
         return status;
+    }
+
+    public String getCadastreNumber() {
+        return cadastreNumber;
+    }
+
+    public String getTaxId() {
+        return taxId;
+    }
+
+    public BuildingStatus getBuildingStatus() {
+        return buildingStatus;
+    }
+
+    public Integer getYearBuilt() {
+        return yearBuilt;
+    }
+
+    public Integer getFloorCount() {
+        return floorCount;
+    }
+
+    public Double getTotalSurfaceArea() {
+        return totalSurfaceArea;
+    }
+
+    public BigDecimal getEstimatedValue() {
+        return estimatedValue;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public Instant getCreatedAt() {

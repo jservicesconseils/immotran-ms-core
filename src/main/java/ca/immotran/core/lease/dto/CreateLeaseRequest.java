@@ -23,6 +23,10 @@ public record CreateLeaseRequest(
 
         @NotNull(message = "le loyer mensuel est requis")
         @DecimalMin(value = "0.0", inclusive = false, message = "le loyer mensuel doit etre positif")
-        BigDecimal monthlyRent
+        BigDecimal monthlyRent,
+
+        @NotNull(message = "le depot de garantie est requis")
+        @DecimalMin(value = "0.0", message = "le depot de garantie ne peut pas etre negatif")
+        BigDecimal securityDeposit
 ) {
 }

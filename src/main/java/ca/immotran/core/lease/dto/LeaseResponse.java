@@ -19,6 +19,8 @@ public record LeaseResponse(
         LocalDate startDate,
         LocalDate endDate,
         BigDecimal monthlyRent,
+        BigDecimal securityDeposit,
+        Instant securityDepositPaidAt,
         LeaseStatus status,
         Instant createdAt
 ) {
@@ -36,6 +38,8 @@ public record LeaseResponse(
                 lease.getStartDate(),
                 lease.getEndDate(),
                 lease.getMonthlyRent(),
+                lease.getSecurityDeposit(),
+                lease.getSecurityDepositPaidAt(),
                 lease.getStatus(),
                 lease.getCreatedAt());
     }

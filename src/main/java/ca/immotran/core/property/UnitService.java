@@ -32,8 +32,19 @@ public class UnitService {
                 request.floor(),
                 request.areaSquareMeters(),
                 request.bedrooms(),
-                request.bathrooms()));
+                request.bathrooms(),
+                request.type(),
+                request.description()));
         return UnitResponse.from(saved);
+    }
+
+    // Appele par LeaseService a la creation d'un bail (cahier des charges,
+    // §4 "prise de possession" -> marquer l'unite "Occupee"). Prend
+    // directement l'entite deja chargee par l'appelant pour eviter un
+    // aller-retour supplementaire en base.
+    public void markOccupied(Unit unit) {
+        unit.markOccupied();
+        repository.save(unit);
     }
 
     public UnitResponse getById(UUID propertyId, UUID unitId) {
