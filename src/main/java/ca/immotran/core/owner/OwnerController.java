@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
@@ -47,6 +48,13 @@ public class OwnerController {
         OwnerResponse owner = ownerService.getById(id);
         TenantClaims.from(jwt).assertAccessTo(owner.organizationId());
         return ResponseEntity.ok(owner);
+    }
+
+    @GetMapping("/api/v1/owners")
+    public ResponseEntity<List<OwnerResponse>> listByOrganization(@RequestParam UUID organizationId,
+                                                                   @AuthenticationPrincipal Jwt jwt) {
+        TenantClaims.from(jwt).assertAccessTo(organizationId);
+        return ResponseEntity.ok(ownerService.listByOrganization(organizationId));
     }
 
     // Associe un proprietaire EXISTANT a une propriete existante, avec sa

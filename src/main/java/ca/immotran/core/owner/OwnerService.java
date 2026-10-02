@@ -40,6 +40,12 @@ public class OwnerService {
         return OwnerResponse.from(getEntityById(id));
     }
 
+    public List<OwnerResponse> listByOrganization(UUID organizationId) {
+        return ownerRepository.findByOrganizationId(organizationId).stream()
+                .map(OwnerResponse::from)
+                .toList();
+    }
+
     public Owner getEntityById(UUID id) {
         return ownerRepository.findById(id)
                 .orElseThrow(() -> new OwnerNotFoundException(id));

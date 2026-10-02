@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -104,6 +105,29 @@ class TenantControllerTest {
         when(tenantService.getById(tenantId)).thenReturn(response(tenantId, organizationId));
 
         mockMvc.perform(get("/api/v1/tenants/{id}", tenantId)
+                        .with(jwt().jwt(builder -> builder.claim("tenant_id", autreTenant.toString()))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void listerLesLocataires_tenantCorrespondant_renvoie200() throws Exception {
+        UUID organizationId = UUID.randomUUID();
+        when(tenantService.listByOrganization(organizationId)).thenReturn(List.of(response(UUID.randomUUID(), organizationId)));
+
+        mockMvc.perform(get("/api/v1/tenants")
+                        .param("organizationId", organizationId.toString())
+                        .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].firstName").value("Marie"));
+    }
+
+    @Test
+    void listerLesLocataires_tenantDifferent_renvoie403() throws Exception {
+        UUID organizationId = UUID.randomUUID();
+        UUID autreTenant = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/v1/tenants")
+                        .param("organizationId", organizationId.toString())
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", autreTenant.toString()))))
                 .andExpect(status().isForbidden());
     }

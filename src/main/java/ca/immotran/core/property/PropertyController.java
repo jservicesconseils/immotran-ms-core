@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
@@ -54,6 +55,15 @@ public class PropertyController {
         PropertyResponse property = propertyService.getById(id);
         TenantClaims.from(jwt).assertAccessTo(property.organizationId());
         return ResponseEntity.ok(property);
+    }
+
+    // organizationId est obligatoire : on verifie le tenant AVANT de
+    // toucher la base (meme id que le tenant, comme pour Organization).
+    @GetMapping
+    public ResponseEntity<List<PropertyResponse>> listByOrganization(@RequestParam UUID organizationId,
+                                                                      @AuthenticationPrincipal Jwt jwt) {
+        TenantClaims.from(jwt).assertAccessTo(organizationId);
+        return ResponseEntity.ok(propertyService.listByOrganization(organizationId));
     }
 
     @PostMapping("/{propertyId}/units")

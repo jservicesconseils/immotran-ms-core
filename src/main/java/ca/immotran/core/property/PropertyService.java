@@ -4,6 +4,7 @@ import ca.immotran.core.property.dto.CreatePropertyRequest;
 import ca.immotran.core.property.dto.PropertyResponse;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -33,6 +34,12 @@ public class PropertyService {
 
     public PropertyResponse getById(UUID id) {
         return PropertyResponse.from(getEntityById(id));
+    }
+
+    public List<PropertyResponse> listByOrganization(UUID organizationId) {
+        return repository.findByOrganizationId(organizationId).stream()
+                .map(PropertyResponse::from)
+                .toList();
     }
 
     // Public (et pas seulement package-private) volontairement : d'autres

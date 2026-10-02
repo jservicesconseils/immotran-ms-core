@@ -4,6 +4,7 @@ import ca.immotran.core.tenant.dto.CreateTenantRequest;
 import ca.immotran.core.tenant.dto.TenantResponse;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -23,6 +24,12 @@ public class TenantService {
 
     public TenantResponse getById(UUID id) {
         return TenantResponse.from(getEntityById(id));
+    }
+
+    public List<TenantResponse> listByOrganization(UUID organizationId) {
+        return repository.findByOrganizationId(organizationId).stream()
+                .map(TenantResponse::from)
+                .toList();
     }
 
     // Public : le module lease a besoin de l'entite brute pour ses

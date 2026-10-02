@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -42,5 +44,12 @@ public class TenantController {
         TenantResponse tenant = tenantService.getById(id);
         TenantClaims.from(jwt).assertAccessTo(tenant.organizationId());
         return ResponseEntity.ok(tenant);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<TenantResponse>> listByOrganization(@RequestParam UUID organizationId,
+                                                                    @AuthenticationPrincipal Jwt jwt) {
+        TenantClaims.from(jwt).assertAccessTo(organizationId);
+        return ResponseEntity.ok(tenantService.listByOrganization(organizationId));
     }
 }

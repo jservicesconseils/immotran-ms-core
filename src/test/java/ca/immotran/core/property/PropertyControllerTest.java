@@ -161,6 +161,29 @@ class PropertyControllerTest {
     }
 
     @Test
+    void listerLesProprietes_tenantCorrespondant_renvoie200() throws Exception {
+        UUID organizationId = UUID.randomUUID();
+        when(propertyService.listByOrganization(organizationId)).thenReturn(List.of(response(UUID.randomUUID(), organizationId)));
+
+        mockMvc.perform(get("/api/v1/properties")
+                        .param("organizationId", organizationId.toString())
+                        .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].organizationId").value(organizationId.toString()));
+    }
+
+    @Test
+    void listerLesProprietes_tenantDifferent_renvoie403() throws Exception {
+        UUID organizationId = UUID.randomUUID();
+        UUID autreTenant = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/v1/properties")
+                        .param("organizationId", organizationId.toString())
+                        .with(jwt().jwt(builder -> builder.claim("tenant_id", autreTenant.toString()))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void ajouterUneUnite_tenantCorrespondant_renvoie201() throws Exception {
         UUID organizationId = UUID.randomUUID();
         UUID propertyId = UUID.randomUUID();

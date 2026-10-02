@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -148,6 +149,29 @@ class OwnerControllerTest {
         mockMvc.perform(get("/api/v1/owners/{id}", ownerId)
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", UUID.randomUUID().toString()))))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void listerLesProprietairesDUneOrganisation_tenantCorrespondant_renvoie200() throws Exception {
+        UUID organizationId = UUID.randomUUID();
+        when(ownerService.listByOrganization(organizationId)).thenReturn(List.of(ownerResponse(UUID.randomUUID(), organizationId)));
+
+        mockMvc.perform(get("/api/v1/owners")
+                        .param("organizationId", organizationId.toString())
+                        .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Jean Tremblay"));
+    }
+
+    @Test
+    void listerLesProprietairesDUneOrganisation_tenantDifferent_renvoie403() throws Exception {
+        UUID organizationId = UUID.randomUUID();
+        UUID autreTenant = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/v1/owners")
+                        .param("organizationId", organizationId.toString())
+                        .with(jwt().jwt(builder -> builder.claim("tenant_id", autreTenant.toString()))))
+                .andExpect(status().isForbidden());
     }
 
     @Test
