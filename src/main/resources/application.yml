@@ -39,6 +39,10 @@ immotran:
   cognito:
     region: ${COGNITO_REGION:ca-central-1}
     user-pool-id: ${COGNITO_USER_POOL_ID:REPLACE_ME_ONCE_POOL_EXISTS}
+  # Utilise uniquement si --spring.profiles.active=local (voir SecurityConfig.localJwtDecoder).
+  # Doit etre IDENTIQUE a environment.mockAuthSharedSecret dans immotran-ui-ng.
+  local-auth:
+    shared-secret: ${LOCAL_AUTH_SHARED_SECRET:local-dev-only-shared-secret-please-change-0123456789}
 
 management:
   endpoints:
