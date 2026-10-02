@@ -60,6 +60,13 @@ public class LeaseService {
         return LeaseResponse.from(lease, leaseTenantRepository.findByLeaseId(leaseId));
     }
 
+    // Public (comme PropertyService/UnitService.getEntityById) : le
+    // module finance a besoin de l'entite Lease brute pour sa propre
+    // relation JPA (Payment).
+    public Lease getEntityById(UUID unitId, UUID leaseId) {
+        return getEntityByIdAndUnit(leaseId, unitId);
+    }
+
     public List<LeaseResponse> listByUnit(UUID propertyId, UUID unitId) {
         // Valide au passage que l'unite existe (404 sinon).
         unitService.getEntityById(propertyId, unitId);
