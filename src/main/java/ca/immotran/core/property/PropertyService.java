@@ -2,6 +2,7 @@ package ca.immotran.core.property;
 
 import ca.immotran.core.property.dto.CreatePropertyRequest;
 import ca.immotran.core.property.dto.PropertyResponse;
+import ca.immotran.core.property.dto.UpdatePropertyRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class PropertyService {
         Property saved = repository.save(new Property(
                 request.organizationId(),
                 request.type(),
+                request.name(),
                 request.street(),
                 request.city(),
                 request.province(),
@@ -42,6 +44,26 @@ public class PropertyService {
 
     public PropertyResponse getById(UUID id) {
         return PropertyResponse.from(getEntityById(id));
+    }
+
+    public PropertyResponse update(UUID id, UpdatePropertyRequest request) {
+        Property property = getEntityById(id);
+        property.update(
+                request.type(),
+                request.name(),
+                request.street(),
+                request.city(),
+                request.province(),
+                request.postalCode(),
+                request.cadastreNumber(),
+                request.taxId(),
+                request.buildingStatus(),
+                request.yearBuilt(),
+                request.floorCount(),
+                request.totalSurfaceArea(),
+                request.estimatedValue(),
+                request.description());
+        return PropertyResponse.from(repository.save(property));
     }
 
     public List<PropertyResponse> listByOrganization(UUID organizationId) {

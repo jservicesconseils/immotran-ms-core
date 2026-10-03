@@ -62,6 +62,12 @@ public class Unit {
     @Column(name = "listed_rent", precision = 10, scale = 2)
     private BigDecimal listedRent;
 
+    // Depot de garantie affiche pour la mise en location (annonce), au
+    // meme titre que listedRent -- distinct du depot reellement percu sur
+    // un bail signe (Lease.securityDeposit).
+    @Column(name = "listed_security_deposit", precision = 10, scale = 2)
+    private BigDecimal listedSecurityDeposit;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private UnitStatus status;
@@ -75,7 +81,8 @@ public class Unit {
 
     public Unit(Property property, String label, boolean principal, Integer floor,
                 Double areaSquareMeters, Integer bedrooms, Integer bathrooms,
-                UnitType type, String description, BigDecimal listedRent) {
+                UnitType type, String description, BigDecimal listedRent,
+                BigDecimal listedSecurityDeposit, UnitStatus status) {
         this.property = property;
         this.label = label;
         this.principal = principal;
@@ -86,8 +93,26 @@ public class Unit {
         this.type = type;
         this.description = description;
         this.listedRent = listedRent;
-        this.status = UnitStatus.DISPONIBLE;
+        this.listedSecurityDeposit = listedSecurityDeposit;
+        this.status = status != null ? status : UnitStatus.DISPONIBLE;
         this.createdAt = Instant.now();
+    }
+
+    // Mutateur ajoute pour l'edition d'une unite (ecran "Modifier
+    // l'appartement" de la maquette) ; ne touche pas au statut, qui suit
+    // son propre cycle (markOccupied, baux) plutot que d'etre reecrit en
+    // bloc depuis un formulaire.
+    public void update(String label, Integer floor, Double areaSquareMeters, Integer bedrooms, Integer bathrooms,
+                        UnitType type, String description, BigDecimal listedRent, BigDecimal listedSecurityDeposit) {
+        this.label = label;
+        this.floor = floor;
+        this.areaSquareMeters = areaSquareMeters;
+        this.bedrooms = bedrooms;
+        this.bathrooms = bathrooms;
+        this.type = type;
+        this.description = description;
+        this.listedRent = listedRent;
+        this.listedSecurityDeposit = listedSecurityDeposit;
     }
 
     /** Appele a la signature d'un bail (cahier des charges, §4 "prise de possession"). */
@@ -137,6 +162,10 @@ public class Unit {
 
     public BigDecimal getListedRent() {
         return listedRent;
+    }
+
+    public BigDecimal getListedSecurityDeposit() {
+        return listedSecurityDeposit;
     }
 
     public UnitStatus getStatus() {

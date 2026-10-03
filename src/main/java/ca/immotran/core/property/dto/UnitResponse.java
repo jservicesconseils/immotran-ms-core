@@ -21,6 +21,7 @@ public record UnitResponse(
         UnitType type,
         String description,
         BigDecimal listedRent,
+        BigDecimal listedSecurityDeposit,
         UnitStatus status,
         Instant createdAt
 ) {
@@ -38,6 +39,7 @@ public record UnitResponse(
                 unit.getType(),
                 unit.getDescription(),
                 unit.getListedRent(),
+                unit.getListedSecurityDeposit(),
                 unit.getStatus(),
                 unit.getCreatedAt());
     }

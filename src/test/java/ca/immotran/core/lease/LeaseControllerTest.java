@@ -54,7 +54,7 @@ class LeaseControllerTest {
     private JwtDecoder jwtDecoder;
 
     private static PropertyResponse propertyResponse(UUID id, UUID organizationId) {
-        return new PropertyResponse(id, organizationId, PropertyType.MAISON_INDIVIDUELLE,
+        return new PropertyResponse(id, organizationId, PropertyType.MAISON_INDIVIDUELLE, null,
                 "123 rue des Lilas", "Montreal", "QC", "H1A 1A1", PropertyStatus.VACANTE,
                 null, null, null, null, null, null, null, null, Instant.now());
     }

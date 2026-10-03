@@ -7,13 +7,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
-/** Ce que le client envoie pour creer une propriete. */
-public record CreatePropertyRequest(
-
-        @NotNull(message = "l'organisation est requise")
-        UUID organizationId,
+/**
+ * Ce que le client envoie pour modifier une propriete existante. Memes
+ * champs que CreatePropertyRequest, sans organizationId (le tenant d'une
+ * propriete ne change jamais apres sa creation).
+ */
+public record UpdatePropertyRequest(
 
         @NotNull(message = "le type de propriete est requis")
         PropertyType type,
@@ -37,8 +37,6 @@ public record CreatePropertyRequest(
         @Size(max = 10, message = "le code postal ne doit pas depasser 10 caracteres")
         String postalCode,
 
-        // Champs optionnels -- supplementaires par rapport au MVP initial,
-        // voir Property pour la justification de leur caractere facultatif.
         @Size(max = 50, message = "le numero de cadastre ne doit pas depasser 50 caracteres")
         String cadastreNumber,
 

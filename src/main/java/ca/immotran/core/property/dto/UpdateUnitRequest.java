@@ -1,6 +1,5 @@
 package ca.immotran.core.property.dto;
 
-import ca.immotran.core.property.UnitStatus;
 import ca.immotran.core.property.UnitType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
@@ -9,14 +8,15 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
-/** Ce que le client envoie pour ajouter une unite a une propriete. */
-public record CreateUnitRequest(
+/**
+ * Ce que le client envoie pour modifier une unite existante. Ne touche
+ * pas a "principal" ni "status" -- voir Unit#update.
+ */
+public record UpdateUnitRequest(
 
         @NotBlank(message = "l'etiquette de l'unite est requise (ex. \"304\" ou \"Principal\")")
         @Size(max = 50, message = "l'etiquette ne doit pas depasser 50 caracteres")
         String label,
-
-        boolean principal,
 
         Integer floor,
 
@@ -29,22 +29,15 @@ public record CreateUnitRequest(
         @Min(value = 0, message = "le nombre de salles de bain ne peut pas etre negatif")
         Integer bathrooms,
 
-        // Optionnel : type de logement (studio, 1 chambre, ...).
         UnitType type,
 
         @Size(max = 2000, message = "la description ne doit pas depasser 2000 caracteres")
         String description,
 
-        // Loyer d'annonce, affiche aux candidats avant meme qu'un bail existe.
         @DecimalMin(value = "0.0", message = "le loyer affiche ne peut pas etre negatif")
         BigDecimal listedRent,
 
-        // Depot de garantie d'annonce (ecran "Ajout d'un appartement" de la maquette).
         @DecimalMin(value = "0.0", message = "le depot de garantie ne peut pas etre negatif")
-        BigDecimal listedSecurityDeposit,
-
-        // Optionnel : statut initial (ex. "En renovation" avant mise en location).
-        // Defaut a DISPONIBLE si absent -- voir Unit.
-        UnitStatus status
+        BigDecimal listedSecurityDeposit
 ) {
 }

@@ -3,6 +3,7 @@ package ca.immotran.core.property;
 import ca.immotran.core.property.dto.CreateUnitRequest;
 import ca.immotran.core.property.dto.UnitListingResponse;
 import ca.immotran.core.property.dto.UnitResponse;
+import ca.immotran.core.property.dto.UpdateUnitRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,8 +37,25 @@ public class UnitService {
                 request.bathrooms(),
                 request.type(),
                 request.description(),
-                request.listedRent()));
+                request.listedRent(),
+                request.listedSecurityDeposit(),
+                request.status()));
         return UnitResponse.from(saved);
+    }
+
+    public UnitResponse update(UUID propertyId, UUID unitId, UpdateUnitRequest request) {
+        Unit unit = getEntityByIdAndProperty(unitId, propertyId);
+        unit.update(
+                request.label(),
+                request.floor(),
+                request.areaSquareMeters(),
+                request.bedrooms(),
+                request.bathrooms(),
+                request.type(),
+                request.description(),
+                request.listedRent(),
+                request.listedSecurityDeposit());
+        return UnitResponse.from(repository.save(unit));
     }
 
     // Appele par LeaseService a la creation d'un bail (cahier des charges,

@@ -5,6 +5,8 @@ import ca.immotran.core.property.dto.CreateUnitRequest;
 import ca.immotran.core.property.dto.PropertyResponse;
 import ca.immotran.core.property.dto.UnitListingResponse;
 import ca.immotran.core.property.dto.UnitResponse;
+import ca.immotran.core.property.dto.UpdatePropertyRequest;
+import ca.immotran.core.property.dto.UpdateUnitRequest;
 import ca.immotran.core.security.TenantClaims;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,6 +61,15 @@ public class PropertyController {
         return ResponseEntity.ok(property);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<PropertyResponse> update(@PathVariable UUID id,
+                                                     @Valid @RequestBody UpdatePropertyRequest request,
+                                                     @AuthenticationPrincipal Jwt jwt) {
+        PropertyResponse existing = propertyService.getById(id);
+        TenantClaims.from(jwt).assertAccessTo(existing.organizationId());
+        return ResponseEntity.ok(propertyService.update(id, request));
+    }
+
     // organizationId est obligatoire : on verifie le tenant AVANT de
     // toucher la base (meme id que le tenant, comme pour Organization).
     @GetMapping
@@ -77,6 +89,16 @@ public class PropertyController {
         return ResponseEntity
                 .created(URI.create("/api/v1/properties/" + propertyId + "/units/" + created.id()))
                 .body(created);
+    }
+
+    @PutMapping("/{propertyId}/units/{unitId}")
+    public ResponseEntity<UnitResponse> updateUnit(@PathVariable UUID propertyId,
+                                                     @PathVariable UUID unitId,
+                                                     @Valid @RequestBody UpdateUnitRequest request,
+                                                     @AuthenticationPrincipal Jwt jwt) {
+        PropertyResponse property = propertyService.getById(propertyId);
+        TenantClaims.from(jwt).assertAccessTo(property.organizationId());
+        return ResponseEntity.ok(unitService.update(propertyId, unitId, request));
     }
 
     @GetMapping("/{propertyId}/units/{unitId}")

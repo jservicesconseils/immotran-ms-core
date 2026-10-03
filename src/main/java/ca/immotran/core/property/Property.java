@@ -42,6 +42,12 @@ public class Property {
     @Column(nullable = false, length = 40)
     private PropertyType type;
 
+    // Nom usuel de la propriete (ex. "Le Domaine du Parc"), distinct de son
+    // adresse -- purement cosmetique, affiche dans la liste/fiche quand
+    // fourni, jamais utilise comme identifiant.
+    @Column(length = 200)
+    private String name;
+
     @Column(nullable = false, length = 200)
     private String street;
 
@@ -99,11 +105,12 @@ public class Property {
         // constructeur requis par JPA, ne pas utiliser directement
     }
 
-    public Property(UUID organizationId, PropertyType type, String street, String city, String province, String postalCode,
+    public Property(UUID organizationId, PropertyType type, String name, String street, String city, String province, String postalCode,
                      String cadastreNumber, String taxId, BuildingStatus buildingStatus, Integer yearBuilt,
                      Integer floorCount, Double totalSurfaceArea, BigDecimal estimatedValue, String description) {
         this.organizationId = organizationId;
         this.type = type;
+        this.name = name;
         this.street = street;
         this.city = city;
         this.province = province;
@@ -130,6 +137,10 @@ public class Property {
 
     public PropertyType getType() {
         return type;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getStreet() {
@@ -186,5 +197,27 @@ public class Property {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    // Mutateurs ajoutes pour l'edition d'une propriete (ecran "Modifier la
+    // propriete" de la maquette) -- la creation initiale continue de passer
+    // par le constructeur, ces setters ne servent qu'a PropertyService#update.
+    public void update(PropertyType type, String name, String street, String city, String province, String postalCode,
+                        String cadastreNumber, String taxId, BuildingStatus buildingStatus, Integer yearBuilt,
+                        Integer floorCount, Double totalSurfaceArea, BigDecimal estimatedValue, String description) {
+        this.type = type;
+        this.name = name;
+        this.street = street;
+        this.city = city;
+        this.province = province;
+        this.postalCode = postalCode;
+        this.cadastreNumber = cadastreNumber;
+        this.taxId = taxId;
+        this.buildingStatus = buildingStatus;
+        this.yearBuilt = yearBuilt;
+        this.floorCount = floorCount;
+        this.totalSurfaceArea = totalSurfaceArea;
+        this.estimatedValue = estimatedValue;
+        this.description = description;
     }
 }
