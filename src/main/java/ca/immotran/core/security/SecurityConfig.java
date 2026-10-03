@@ -57,6 +57,13 @@ public class SecurityConfig {
                         // creation est public ; lecture/evaluation/decision restent
                         // reservees au personnel authentifie.
                         .requestMatchers(HttpMethod.POST, "/api/v1/properties/*/units/*/applications").permitAll()
+                        // Suivi de candidature par le candidat lui-meme (espace
+                        // locataire) : accessible par le seul id, sans jeton, comme
+                        // un numero de suivi de colis (voir ApplicationPublicStatusController).
+                        .requestMatchers(HttpMethod.GET, "/api/v1/applications/*/status").permitAll()
+                        // Annonce d'une unite (voir PropertyController.getUnitListing) :
+                        // un candidat la consulte avant meme de postuler, sans jeton.
+                        .requestMatchers(HttpMethod.GET, "/api/v1/properties/*/units/*/listing").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {}));
 

@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -54,6 +55,13 @@ public class Unit {
     @Column(length = 2000)
     private String description;
 
+    // Loyer affiche pour la mise en location (annonce), independant de
+    // tout bail : existe avant meme qu'un candidat postule (ecran
+    // "Location souhaitee" du depot de dossier). Le loyer reel d'un
+    // bail signe est stocke separement sur Lease.monthlyRent.
+    @Column(name = "listed_rent", precision = 10, scale = 2)
+    private BigDecimal listedRent;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private UnitStatus status;
@@ -67,7 +75,7 @@ public class Unit {
 
     public Unit(Property property, String label, boolean principal, Integer floor,
                 Double areaSquareMeters, Integer bedrooms, Integer bathrooms,
-                UnitType type, String description) {
+                UnitType type, String description, BigDecimal listedRent) {
         this.property = property;
         this.label = label;
         this.principal = principal;
@@ -77,6 +85,7 @@ public class Unit {
         this.bathrooms = bathrooms;
         this.type = type;
         this.description = description;
+        this.listedRent = listedRent;
         this.status = UnitStatus.DISPONIBLE;
         this.createdAt = Instant.now();
     }
@@ -124,6 +133,10 @@ public class Unit {
 
     public String getDescription() {
         return description;
+    }
+
+    public BigDecimal getListedRent() {
+        return listedRent;
     }
 
     public UnitStatus getStatus() {

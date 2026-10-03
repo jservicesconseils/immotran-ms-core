@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,12 +65,14 @@ class ApplicationControllerTest {
 
     private static SubmitApplicationRequest submitRequest() {
         return new SubmitApplicationRequest("Jean", "Tremblay", "jean.tremblay@example.com", "514-555-0100",
-                "Acme inc.", new BigDecimal("4500.00"), List.of(new ReferenceRequest("Marie Leblanc", "514-555-0199", null)));
+                "Acme inc.", new BigDecimal("4500.00"), LocalDate.of(1990, 5, 15), "123 rue Principale, Montreal",
+                null, "Ingenieur logiciel", List.of(new ReferenceRequest("Marie Leblanc", "514-555-0199", null)));
     }
 
     private static ApplicationResponse applicationResponse(UUID id, UUID propertyId, UUID unitId, ApplicationStatus status) {
         return new ApplicationResponse(id, propertyId, unitId, "Jean", "Tremblay", "jean.tremblay@example.com",
-                "514-555-0100", "Acme inc.", new BigDecimal("4500.00"), status, null, null, null,
+                "514-555-0100", "Acme inc.", new BigDecimal("4500.00"), LocalDate.of(1990, 5, 15),
+                "123 rue Principale, Montreal", null, "Ingenieur logiciel", status, null, null, null,
                 List.of(new ReferenceResponse(UUID.randomUUID(), "Marie Leblanc", "514-555-0199", null)),
                 Instant.now(), null);
     }
@@ -91,17 +94,24 @@ class ApplicationControllerTest {
     }
 
     @Test
-    void soumettreUneCandidature_sansReference_renvoie400() throws Exception {
+    void soumettreUneCandidature_sansReference_renvoie201() throws Exception {
+        // Les references sont optionnelles : certains parcours (voir le
+        // formulaire public) les collectent comme une piece jointe plutot
+        // qu'une liste structuree -- voir SubmitApplicationRequest.
         UUID propertyId = UUID.randomUUID();
         UUID unitId = UUID.randomUUID();
+        UUID applicationId = UUID.randomUUID();
+        when(applicationService.submit(eq(propertyId), eq(unitId), any()))
+                .thenReturn(applicationResponse(applicationId, propertyId, unitId, ApplicationStatus.EN_ATTENTE_VERIFICATION));
 
-        SubmitApplicationRequest invalide = new SubmitApplicationRequest("Jean", "Tremblay",
-                "jean.tremblay@example.com", "514-555-0100", "Acme inc.", new BigDecimal("4500.00"), List.of());
+        SubmitApplicationRequest sansReference = new SubmitApplicationRequest("Jean", "Tremblay",
+                "jean.tremblay@example.com", "514-555-0100", "Acme inc.", new BigDecimal("4500.00"),
+                null, null, null, null, List.of());
 
         mockMvc.perform(post("/api/v1/properties/{propertyId}/units/{unitId}/applications", propertyId, unitId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalide)))
-                .andExpect(status().isBadRequest());
+                        .content(objectMapper.writeValueAsString(sansReference)))
+                .andExpect(status().isCreated());
     }
 
     @Test

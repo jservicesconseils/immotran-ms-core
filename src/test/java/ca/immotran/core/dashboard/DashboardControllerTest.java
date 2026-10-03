@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
@@ -36,7 +37,7 @@ class DashboardControllerTest {
     void lireLeDashboard_tenantCorrespondant_renvoie200() throws Exception {
         UUID organizationId = UUID.randomUUID();
         when(dashboardService.getForOrganization(organizationId)).thenReturn(new DashboardResponse(
-                organizationId, 5, 12, 9, 3, 2, new BigDecimal("18000.00"), new BigDecimal("3200.00"), 1));
+                organizationId, 5, 12, 9, 3, 2, new BigDecimal("18000.00"), new BigDecimal("3200.00"), 1, 0, List.of()));
 
         mockMvc.perform(get("/api/v1/organizations/{organizationId}/dashboard", organizationId)
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString()))))

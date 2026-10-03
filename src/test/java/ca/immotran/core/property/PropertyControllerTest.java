@@ -3,6 +3,7 @@ package ca.immotran.core.property;
 import ca.immotran.core.property.dto.CreatePropertyRequest;
 import ca.immotran.core.property.dto.CreateUnitRequest;
 import ca.immotran.core.property.dto.PropertyResponse;
+import ca.immotran.core.property.dto.UnitListingResponse;
 import ca.immotran.core.property.dto.UnitResponse;
 import ca.immotran.core.security.SecurityConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -192,9 +194,9 @@ class PropertyControllerTest {
         UUID unitId = UUID.randomUUID();
         when(propertyService.getById(propertyId)).thenReturn(response(propertyId, organizationId));
         when(unitService.create(eq(propertyId), any())).thenReturn(
-                new UnitResponse(unitId, propertyId, "Principal", true, null, null, 3, 1, null, null, UnitStatus.DISPONIBLE, Instant.now()));
+                new UnitResponse(unitId, propertyId, "Principal", true, null, null, 3, 1, null, null, null, UnitStatus.DISPONIBLE, Instant.now()));
 
-        CreateUnitRequest request = new CreateUnitRequest("Principal", true, null, null, 3, 1, null, null);
+        CreateUnitRequest request = new CreateUnitRequest("Principal", true, null, null, 3, 1, null, null, null);
 
         mockMvc.perform(post("/api/v1/properties/{propertyId}/units", propertyId)
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString())))
@@ -213,7 +215,7 @@ class PropertyControllerTest {
         UUID propertyId = UUID.randomUUID();
         when(propertyService.getById(propertyId)).thenReturn(response(propertyId, organizationId));
 
-        CreateUnitRequest request = new CreateUnitRequest("304", false, 3, 55.5, 2, 1, null, null);
+        CreateUnitRequest request = new CreateUnitRequest("304", false, 3, 55.5, 2, 1, null, null, null);
 
         mockMvc.perform(post("/api/v1/properties/{propertyId}/units", propertyId)
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", autreTenant.toString())))
@@ -228,11 +230,25 @@ class PropertyControllerTest {
         UUID propertyId = UUID.randomUUID();
         when(propertyService.getById(propertyId)).thenReturn(response(propertyId, organizationId));
         when(unitService.listByProperty(propertyId)).thenReturn(List.of(
-                new UnitResponse(UUID.randomUUID(), propertyId, "Principal", true, null, null, 3, 1, null, null, UnitStatus.DISPONIBLE, Instant.now())));
+                new UnitResponse(UUID.randomUUID(), propertyId, "Principal", true, null, null, 3, 1, null, null, null, UnitStatus.DISPONIBLE, Instant.now())));
 
         mockMvc.perform(get("/api/v1/properties/{propertyId}/units", propertyId)
                         .with(jwt().jwt(builder -> builder.claim("tenant_id", organizationId.toString()))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].label").value("Principal"));
+    }
+
+    @Test
+    void consulterLAnnonceDUneUnite_nonAuthentifie_renvoie200() throws Exception {
+        UUID propertyId = UUID.randomUUID();
+        UUID unitId = UUID.randomUUID();
+        when(unitService.getListing(propertyId, unitId)).thenReturn(new UnitListingResponse(
+                propertyId, unitId, "101", UnitType.DEUX_CHAMBRES, 2, 1, 85.0, new BigDecimal("1250.00"),
+                "123 Rue Principale", "Montreal", "QC", UnitStatus.DISPONIBLE));
+
+        mockMvc.perform(get("/api/v1/properties/{propertyId}/units/{unitId}/listing", propertyId, unitId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.unitLabel").value("101"))
+                .andExpect(jsonPath("$.listedRent").value(1250.00));
     }
 }

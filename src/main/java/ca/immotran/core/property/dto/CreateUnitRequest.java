@@ -1,9 +1,12 @@
 package ca.immotran.core.property.dto;
 
 import ca.immotran.core.property.UnitType;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+import java.math.BigDecimal;
 
 /** Ce que le client envoie pour ajouter une unite a une propriete. */
 public record CreateUnitRequest(
@@ -29,6 +32,10 @@ public record CreateUnitRequest(
         UnitType type,
 
         @Size(max = 2000, message = "la description ne doit pas depasser 2000 caracteres")
-        String description
+        String description,
+
+        // Loyer d'annonce, affiche aux candidats avant meme qu'un bail existe.
+        @DecimalMin(value = "0.0", message = "le loyer affiche ne peut pas etre negatif")
+        BigDecimal listedRent
 ) {
 }

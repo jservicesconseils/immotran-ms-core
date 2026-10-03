@@ -4,6 +4,7 @@ import ca.immotran.core.property.Unit;
 import ca.immotran.core.property.UnitStatus;
 import ca.immotran.core.property.UnitType;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -19,6 +20,7 @@ public record UnitResponse(
         Integer bathrooms,
         UnitType type,
         String description,
+        BigDecimal listedRent,
         UnitStatus status,
         Instant createdAt
 ) {
@@ -35,6 +37,7 @@ public record UnitResponse(
                 unit.getBathrooms(),
                 unit.getType(),
                 unit.getDescription(),
+                unit.getListedRent(),
                 unit.getStatus(),
                 unit.getCreatedAt());
     }

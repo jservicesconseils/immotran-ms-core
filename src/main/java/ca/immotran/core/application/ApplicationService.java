@@ -2,9 +2,11 @@ package ca.immotran.core.application;
 
 import ca.immotran.core.application.dto.ApplicationResponse;
 import ca.immotran.core.application.dto.DecideApplicationRequest;
+import ca.immotran.core.application.dto.ReferenceRequest;
 import ca.immotran.core.application.dto.RequestAdditionalInfoRequest;
 import ca.immotran.core.application.dto.ReviewApplicationRequest;
 import ca.immotran.core.application.dto.SubmitApplicationRequest;
+import ca.immotran.core.application.dto.TenantApplicationStatusResponse;
 import ca.immotran.core.property.Unit;
 import ca.immotran.core.property.UnitService;
 import org.springframework.stereotype.Service;
@@ -36,9 +38,11 @@ public class ApplicationService {
         Unit unit = unitService.getEntityById(propertyId, unitId);
 
         Application saved = repository.save(new Application(unit, request.firstName(), request.lastName(),
-                request.email(), request.phone(), request.employerName(), request.monthlyIncome()));
+                request.email(), request.phone(), request.employerName(), request.monthlyIncome(),
+                request.dateOfBirth(), request.currentAddress(), request.socialInsuranceNumber(), request.profession()));
 
-        List<ApplicationReference> references = request.references().stream()
+        List<ReferenceRequest> requestedReferences = request.references() != null ? request.references() : List.of();
+        List<ApplicationReference> references = requestedReferences.stream()
                 .map(reference -> referenceRepository.save(
                         new ApplicationReference(saved, reference.name(), reference.phone(), reference.email())))
                 .toList();
@@ -67,6 +71,15 @@ public class ApplicationService {
 
     public ApplicationResponse getById(UUID propertyId, UUID unitId, UUID applicationId) {
         return toResponse(getEntityByIdAndUnit(applicationId, propertyId, unitId));
+    }
+
+    // Public (voir ApplicationController.getPublicStatus) : accessible au
+    // candidat lui-meme par le seul id de candidature, sans jeton ni
+    // connaissance de propertyId/unitId -- c'est son "numero de suivi".
+    public TenantApplicationStatusResponse getPublicStatus(UUID applicationId) {
+        Application application = repository.findById(applicationId)
+                .orElseThrow(() -> new ApplicationNotFoundException(applicationId));
+        return TenantApplicationStatusResponse.from(application);
     }
 
     public List<ApplicationResponse> listByUnit(UUID propertyId, UUID unitId) {

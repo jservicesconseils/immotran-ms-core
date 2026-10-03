@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -55,6 +56,22 @@ public class Application {
     @Column(name = "monthly_income", precision = 10, scale = 2)
     private BigDecimal monthlyIncome;
 
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Column(name = "current_address", length = 300)
+    private String currentAddress;
+
+    // Facultatif selon les lois provinciales sur la protection de la vie
+    // privee (voir le formulaire) -- jamais exige, jamais utilise pour
+    // la decision automatiquement, uniquement consultatif pour le
+    // personnel de gestion.
+    @Column(name = "social_insurance_number", length = 20)
+    private String socialInsuranceNumber;
+
+    @Column(length = 150)
+    private String profession;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private ApplicationStatus status;
@@ -81,7 +98,8 @@ public class Application {
     }
 
     public Application(Unit unit, String firstName, String lastName, String email, String phone,
-                        String employerName, BigDecimal monthlyIncome) {
+                        String employerName, BigDecimal monthlyIncome, LocalDate dateOfBirth,
+                        String currentAddress, String socialInsuranceNumber, String profession) {
         this.unit = unit;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -89,6 +107,10 @@ public class Application {
         this.phone = phone;
         this.employerName = employerName;
         this.monthlyIncome = monthlyIncome;
+        this.dateOfBirth = dateOfBirth;
+        this.currentAddress = currentAddress;
+        this.socialInsuranceNumber = socialInsuranceNumber;
+        this.profession = profession;
         this.status = ApplicationStatus.EN_ATTENTE_VERIFICATION;
         this.submittedAt = Instant.now();
     }
@@ -143,6 +165,22 @@ public class Application {
 
     public BigDecimal getMonthlyIncome() {
         return monthlyIncome;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public String getCurrentAddress() {
+        return currentAddress;
+    }
+
+    public String getSocialInsuranceNumber() {
+        return socialInsuranceNumber;
+    }
+
+    public String getProfession() {
+        return profession;
     }
 
     public ApplicationStatus getStatus() {

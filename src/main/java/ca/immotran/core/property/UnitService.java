@@ -1,6 +1,7 @@
 package ca.immotran.core.property;
 
 import ca.immotran.core.property.dto.CreateUnitRequest;
+import ca.immotran.core.property.dto.UnitListingResponse;
 import ca.immotran.core.property.dto.UnitResponse;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,8 @@ public class UnitService {
                 request.bedrooms(),
                 request.bathrooms(),
                 request.type(),
-                request.description()));
+                request.description(),
+                request.listedRent()));
         return UnitResponse.from(saved);
     }
 
@@ -49,6 +51,13 @@ public class UnitService {
 
     public UnitResponse getById(UUID propertyId, UUID unitId) {
         return UnitResponse.from(getEntityByIdAndProperty(unitId, propertyId));
+    }
+
+    // Public (voir PropertyController.getUnitListing) : un candidat non
+    // authentifie consulte l'annonce avant de postuler. DTO volontairement
+    // distinct de UnitResponse (jamais organizationId ni champs internes).
+    public UnitListingResponse getListing(UUID propertyId, UUID unitId) {
+        return UnitListingResponse.from(getEntityByIdAndProperty(unitId, propertyId));
     }
 
     // Public (comme PropertyService.getEntityById) : le module lease a

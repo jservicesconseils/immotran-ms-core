@@ -3,6 +3,7 @@ package ca.immotran.core.property;
 import ca.immotran.core.property.dto.CreatePropertyRequest;
 import ca.immotran.core.property.dto.CreateUnitRequest;
 import ca.immotran.core.property.dto.PropertyResponse;
+import ca.immotran.core.property.dto.UnitListingResponse;
 import ca.immotran.core.property.dto.UnitResponse;
 import ca.immotran.core.security.TenantClaims;
 import jakarta.validation.Valid;
@@ -93,5 +94,13 @@ public class PropertyController {
         PropertyResponse property = propertyService.getById(propertyId);
         TenantClaims.from(jwt).assertAccessTo(property.organizationId());
         return ResponseEntity.ok(unitService.listByProperty(propertyId));
+    }
+
+    // Public (voir SecurityConfig : permitAll sur ce chemin precis) : un
+    // candidat consulte l'annonce d'une unite avant de postuler, sans
+    // jeton -- aucune verification TenantClaims ici, volontairement.
+    @GetMapping("/{propertyId}/units/{unitId}/listing")
+    public ResponseEntity<UnitListingResponse> getUnitListing(@PathVariable UUID propertyId, @PathVariable UUID unitId) {
+        return ResponseEntity.ok(unitService.getListing(propertyId, unitId));
     }
 }

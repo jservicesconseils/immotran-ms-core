@@ -6,6 +6,7 @@ import ca.immotran.core.application.ApplicationStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +21,10 @@ public record ApplicationResponse(
         String phone,
         String employerName,
         BigDecimal monthlyIncome,
+        LocalDate dateOfBirth,
+        String currentAddress,
+        String socialInsuranceNumber,
+        String profession,
         ApplicationStatus status,
         Integer solvencyScore,
         String reviewComments,
@@ -40,6 +45,10 @@ public record ApplicationResponse(
                 application.getPhone(),
                 application.getEmployerName(),
                 application.getMonthlyIncome(),
+                application.getDateOfBirth(),
+                application.getCurrentAddress(),
+                application.getSocialInsuranceNumber(),
+                application.getProfession(),
                 application.getStatus(),
                 application.getSolvencyScore(),
                 application.getReviewComments(),
