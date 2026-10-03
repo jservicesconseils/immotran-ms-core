@@ -10,8 +10,12 @@ spring:
   # pour developper et tester en local, sans rien installer. On la
   # remplacera par une vraie base (PostgreSQL/RDS) uniquement au moment
   # de deployer sur AWS (etape volontairement reportee).
+  # DB_CLOSE_DELAY=-1 : sans ce parametre, H2 detruit la base en memoire
+  # des que le pool HikariCP ferme sa derniere connexion (ex. apres une
+  # periode d'inactivite) -- meme sans redemarrer le serveur, ce qui
+  # videait silencieusement toutes les donnees de test.
   datasource:
-    url: jdbc:h2:mem:coredb
+    url: jdbc:h2:mem:coredb;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
     username: sa
     password: ""
